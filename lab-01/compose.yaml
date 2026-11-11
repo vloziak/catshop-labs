@@ -1,0 +1,48 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgresql://catshop:${POSTGRES_PASSWORD}@db:5432/catshop
+      PARTNER_URL: http://partner:8080
+    depends_on:
+      db:
+        condition: service_healthy
+      partner:
+        condition: service_started
+    networks:
+      - frontend
+      - backend
+
+  db:
+    image: postgres:16.4-alpine
+    environment:
+      POSTGRES_USER: catshop
+      POSTGRES_DB: catshop
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U catshop -d catshop"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+    networks:
+      - backend
+
+  partner:
+    image: wiremock/wiremock:3.6.0
+    volumes:
+      - ./partner/mappings:/home/wiremock/mappings:ro
+    networks:
+      - backend
+
+networks:
+  frontend:
+  backend:
+    internal: true
+
+volumes:
+  pgdata:
