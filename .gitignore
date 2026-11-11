@@ -5,3 +5,19 @@ __pycache__/
 data/
 *.dump
 .DS_Store
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Build
+build/
+out/
+target/
+
+# Gradle
+.gradle/
+
+# OS
+.DS_Store
